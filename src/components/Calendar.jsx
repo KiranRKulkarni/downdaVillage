@@ -1,12 +1,26 @@
-import { ROOMS } from '../data'
+import { ROOMS, ROOM_INVENTORY } from '../data'
 import { formatDisplayDate, toLocalDateKey } from '../utils/dateFormat'
 
 const today = toLocalDateKey(new Date())
 const dateKey = (date) => toLocalDateKey(date)
 const overlap = (booking, date) => booking.check_in <= date && date < booking.check_out
+const roomTypeMap = ROOM_INVENTORY.flatMap((group) => group.rooms.map((room) => [room, group.category])).reduce((map, [room, category]) => {
+  map[room] = category
+  return map
+}, {})
+
+const categorySlug = (category) =>
+  category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 
 export default function Calendar({ bookings, month, setMonth }) {
   const days = Array.from({ length: new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate() }, (_, index) => new Date(month.getFullYear(), month.getMonth(), index + 1))
   const label = month.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
-  return <section className="calendar"><div className="section-heading"><div><p className="eyebrow">AVAILABILITY</p><h2>{label}</h2></div><div className="month-controls"><button type="button" aria-label="Previous month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>←</button><button type="button" aria-label="Next month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>→</button></div></div><p className="legend"><i></i> Occupied <i className="checkout-key"></i> Check-out <i className="today"></i> Today</p><div className="calendar-scroll"><div className="calendar-grid" style={{ gridTemplateColumns: `78px repeat(${days.length}, 34px)` }}><div className="corner">Room</div>{days.map((day) => <div className={dateKey(day) === today ? 'day today' : 'day'} key={dateKey(day)}>{day.getDate()}</div>)}  {ROOMS.map((room) => <div className="calendar-row" key={room}><strong>{room}</strong>{days.map((day) => { const key = dateKey(day); const booking = bookings.find((b) => b.room_number.split(',').includes(room) && b.stay_status !== 'cancelled' && overlap(b, key)); const checkout = bookings.find((b) => b.room_number.split(',').includes(room) && b.stay_status !== 'cancelled' && b.check_out === key); const className = booking ? 'booked' : checkout ? 'checkout' : key === today ? 'today-cell' : ''; const title = booking ? `${booking.guest_name} · occupied until ${formatDisplayDate(booking.check_out)}` : checkout ? `${checkout.guest_name} · check-out` : 'Available'; return <span title={title} className={className} key={key}>{booking ? '●' : checkout ? '↗' : ''}</span> })}</div>)}</div></div><p className="subtle">Green dates are occupied. Orange marks a guest checking out; the room can be prepared for the next stay.</p></section>
+  return <section className="calendar"><div className="section-heading"><div><p className="eyebrow">AVAILABILITY</p><h2>{label}</h2></div><div className="month-controls"><button type="button" aria-label="Previous month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>←</button><button type="button" aria-label="Next month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>→</button></div></div><p className="legend"><i></i> Occupied <i className="checkout-key"></i> Check-out <i className="today"></i> Today</p><div className="calendar-scroll"><div className="calendar-grid" style={{ gridTemplateColumns: `150px repeat(${days.length}, 34px)` }}><div className="corner">Room</div>{days.map((day) => <div className={dateKey(day) === today ? 'day today' : 'day'} key={dateKey(day)}>{day.getDate()}</div>)}  {ROOMS.map((room) => {
+            const roomType = roomTypeMap[room]
+            const typeClass = roomType ? `type-${categorySlug(roomType)}` : ''
+            return <div className="calendar-row" key={room}><strong className={typeClass}>{roomType ? `${room} — ${roomType}` : room}</strong>{days.map((day) => { const key = dateKey(day); const booking = bookings.find((b) => b.room_number.split(',').includes(room) && b.stay_status !== 'cancelled' && overlap(b, key)); const checkout = bookings.find((b) => b.room_number.split(',').includes(room) && b.stay_status !== 'cancelled' && b.check_out === key); const className = booking ? 'booked' : checkout ? 'checkout' : key === today ? 'today-cell' : ''; const title = booking ? `${booking.guest_name} · occupied until ${formatDisplayDate(booking.check_out)}` : checkout ? `${checkout.guest_name} · check-out` : 'Available'; return <span title={title} className={className} key={key}>{booking ? '●' : checkout ? '↗' : ''}</span> })}</div>
+          })}</div></div><p className="subtle">Green dates are occupied. Orange marks a guest checking out; the room can be prepared for the next stay.</p></section>
 }

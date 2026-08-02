@@ -10,9 +10,7 @@ function Metric({ label, value, note, onClick }) {
 
 function PropertyCard({ property, bookingsCount, revenue, collections, pending, onClick }) {
   const accentStyles = {
-    'DD Cottages': { background: 'linear-gradient(135deg, #eefbf4 0%, #dcefe6 45%, #bcdcc8 100%)', borderColor: '#7cb596', color: '#174b3a' },
-    'DD Villa': { background: 'linear-gradient(135deg, #fff7eb 0%, #f8e4c4 45%, #e7c68d 100%)', borderColor: '#d79d41', color: '#6b3f0a' },
-    'DD Serenity Cottages': { background: 'linear-gradient(135deg, #f4f3ff 0%, #e1dcff 45%, #c8b7ff 100%)', borderColor: '#8d6eff', color: '#442c7a' }
+    'Down da village': { background: 'linear-gradient(135deg, #eefbf4 0%, #dcefe6 45%, #bcdcc8 100%)', borderColor: '#7cb596', color: '#174b3a' }
   }
   const style = accentStyles[property] || { background: 'linear-gradient(135deg, #f8fbff 0%, #e8f1f8 45%, #d4e6f2 100%)', borderColor: '#8db6cb', color: '#204552' }
 

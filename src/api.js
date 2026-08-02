@@ -41,7 +41,7 @@ export async function signOut(userContext = {}) {
         email: email || '',
         full_name: full_name || '',
         action: 'logout',
-        details: 'Signed out of DD Cottages',
+        details: 'Signed out of Down da village',
       })
     } catch (error) {
       console.error(error)
@@ -166,7 +166,7 @@ export async function saveBooking(booking) {
   const { id, ...values } = booking
   const normalizedValues = {
     ...values,
-    property: values.property === 'DD Serenity' ? 'DD Serenity Cottages' : values.property,
+    property: values.property,
   }
   const request = id
     ? supabase.from('bookings').update(normalizedValues).eq('id', id).select().single()

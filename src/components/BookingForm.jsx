@@ -2,8 +2,8 @@ import {
   PAID_TO,
   PAYMENT_METHODS,
   PAYMENT_STATUSES,
-  PROPERTIES,
   PROPERTY_ROOMS,
+  ROOM_INVENTORY,
   SETTLEMENT_STATUSES,
   SOURCES,
 } from "../data";
@@ -64,7 +64,7 @@ const getBookingStatusClass = (booking = {}) => {
 }
 function RoomSelector({ value, onChange, bookings = [], form = {} }) {
   const availableRooms =
-    PROPERTY_ROOMS[form.property] || PROPERTY_ROOMS["DD Cottages"];
+    PROPERTY_ROOMS[form.property] || PROPERTY_ROOMS["Down da village"];
   const selected = new Set(
     (value || "")
       .split(",")
@@ -102,31 +102,52 @@ function RoomSelector({ value, onChange, bookings = [], form = {} }) {
       [...next].sort((a, b) => Number(a) - Number(b)).join(","),
     );
   };
+  const categorySlug = (category) =>
+    category
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
   return (
     <fieldset className="room-selector">
-      <legend>Rooms / Cottages</legend>
-      <div>
-        {availableRooms.map((room) => {
-          const status = roomStatusMap[room]
-          const isUnavailable = status === 'occupied' || status === 'reserved'
+      <legend>Rooms - {form.property || "Down da village"}</legend>
+      <div className="room-groups">
+        {ROOM_INVENTORY.map((group) => {
+          const rooms = group.rooms.filter((room) => availableRooms.includes(room));
+          if (!rooms.length) return null;
+          const groupClass = `room-group type-${categorySlug(group.category)}`;
           return (
-            <label key={room} className={isUnavailable ? `disabled ${status}` : ""}>
-              <input
-                type="checkbox"
-                checked={selected.has(room)}
-                onChange={() => !isUnavailable && toggle(room)}
-                disabled={isUnavailable}
-              />
-              <span>
-                {room}
-                {isUnavailable && " ●"}
-              </span>
-              {status && (
-                <small className="room-status-label">
-                  {status === 'occupied' ? 'Occupied' : 'Reserved'}
-                </small>
-              )}
-            </label>
+            <div key={group.category} className={groupClass}>
+              <div className="room-group-heading">
+                <span>{group.category}</span>
+                <small>{group.location}</small>
+              </div>
+              <div className="room-list">
+                {rooms.map((room) => {
+                  const status = roomStatusMap[room];
+                  const isUnavailable = status === "occupied" || status === "reserved";
+                  return (
+                    <label
+                      key={room}
+                      className={`room-item ${isUnavailable ? `disabled ${status}` : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.has(room)}
+                        onChange={() => !isUnavailable && toggle(room)}
+                        disabled={isUnavailable}
+                      />
+                      <span>{room}</span>
+                      {status && (
+                        <small className="room-status-label">
+                          {status === 'occupied' ? 'Occupied' : 'Reserved'}
+                        </small>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
@@ -151,6 +172,7 @@ export default function BookingForm({
 }) {
   return (
     <form className="booking-form page-form" onSubmit={submit}>
+      <input type="hidden" name="property" value={form.property} />
       <div className="section-heading">
         <div>
           <p className="eyebrow">{form.id ? "EDIT BOOKING" : "NEW BOOKING"}</p>
@@ -167,20 +189,17 @@ export default function BookingForm({
           </button>
         )}
       </div>
+      <div className="booking-top">
+        <div className="booking-top-right">
+          <RoomSelector
+            value={form.room_number}
+            onChange={update}
+            bookings={bookings}
+            form={form}
+          />
+        </div>
+      </div>
       <div className="field-grid">
-        <Select
-          label="Property"
-          name="property"
-          value={form.property}
-          onChange={update}
-          values={PROPERTIES}
-        />
-        <RoomSelector
-          value={form.room_number}
-          onChange={update}
-          bookings={bookings}
-          form={form}
-        />
         <Field
           label="Guest name"
           name="guest_name"
