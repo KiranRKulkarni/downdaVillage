@@ -120,6 +120,36 @@ function App() {
     return () => { current = false; subscription.unsubscribe() }
   }, [])
 
+  useEffect(() => {
+    if (!session || !supabase) return undefined
+    const timeoutMs = 15 * 60 * 1000
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll']
+    let timeoutId = null
+
+    const resetTimeout = () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = window.setTimeout(async () => {
+        try {
+          await signOut({
+            userId: profile?.id,
+            email: profile?.email,
+            full_name: profile?.full_name,
+          })
+        } catch (error) {
+          console.error('Idle logout failed', error)
+        }
+      }, timeoutMs)
+    }
+
+    events.forEach((eventName) => window.addEventListener(eventName, resetTimeout))
+    resetTimeout()
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      events.forEach((eventName) => window.removeEventListener(eventName, resetTimeout))
+    }
+  }, [session, profile])
+
   if (!isConfigured) return <main><AuthNotice title="Connect Supabase first" message="Add your Supabase URL and publishable key to .env.local, then restart the development server." /></main>
   if (loading) return <main><AuthNotice title="Checking your access" message="Please wait…" /></main>
   if (error) return <main><AuthNotice title="Could not check access" message={error} /></main>

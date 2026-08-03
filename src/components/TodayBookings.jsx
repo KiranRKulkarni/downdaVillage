@@ -11,6 +11,6 @@ export default function TodayBookings({ bookings, checkIn, checkingIn, checkOut,
 }
 
 function Activity({ title, items, label, checkout, action, actionLoading, actionLabel, className }) {
-  return <article className={['activity', checkout && 'checkout-activity', className].filter(Boolean).join(' ')}><p>{title}</p>{items.length ? items.map((item) => <div className="guest" key={item.id}><strong>Room {item.room_number}</strong><span>{item.guest_name}</span><small>{item.mobile || label}</small>{action && <button className={checkout ? 'check-in check-out' : 'check-in'} disabled={actionLoading === item.id} onClick={() => action(item.id)}>{actionLoading === item.id ? `${actionLabel}…` : actionLabel}</button>}</div>) : <small>No {title.toLowerCase()} today</small>}</article>
+  return <article className={['activity', checkout && 'checkout-activity', className].filter(Boolean).join(' ')}><p>{title}</p><div className="guest-list">{items.length ? items.map((item) => <div className="guest" key={item.id}><strong>Room {item.room_number}</strong><span>{item.guest_name}</span><small>{item.mobile || label}</small>{action && <button className={checkout ? 'check-in check-out' : 'check-in'} disabled={actionLoading === item.id} onClick={() => action(item.id)}>{actionLoading === item.id ? `${actionLabel}…` : actionLabel}</button>}</div>) : <small>No {title.toLowerCase()} today</small>}</div></article>
 }
 import { exportDailyMovement } from '../utils/exportDailyMovement'
