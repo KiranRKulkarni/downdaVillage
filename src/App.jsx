@@ -207,17 +207,31 @@ function Members() {
 function ActivityLog({ profile }) {
   const [entries, setEntries] = useState([])
   const [message, setMessage] = useState('')
+  const [page, setPage] = useState(1)
+  const pageSize = 15
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize))
+
   async function refresh() {
     try {
       const logs = await getActivityLogs()
       setEntries(logs)
+      setPage(1)
     } catch (error) {
       setMessage(error.message)
     }
   }
+
   useEffect(() => { void refresh() }, [])
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
+
   if (profile.role !== 'admin') return null
-  return <section className="records"><div className="section-heading"><div><p className="eyebrow">ADMIN ONLY</p><h2>Activity log</h2></div><button className="text-button" onClick={() => void refresh()}>Refresh</button></div><p className="subtle">Tracks member sign-ins, sign-outs, and related session activity.</p>{message && <p className="message">{message}</p>}<div className="table-wrap"><table><thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.id}><td><strong>{entry.full_name || entry.email || 'Unknown user'}</strong><small>{entry.email}</small></td><td>{entry.action}</td><td>{entry.details}</td><td>{entry.created_at ? new Date(entry.created_at).toLocaleString('en-IN') : '—'}</td></tr>)}</tbody></table></div></section>
+  const visibleEntries = entries.slice((page - 1) * pageSize, page * pageSize)
+
+  return <section className="records"><div className="section-heading"><div><p className="eyebrow">ADMIN ONLY</p><h2>Activity log</h2></div><div><button className="text-button" onClick={() => void refresh()}>Refresh</button><span className="subtle" style={{ marginLeft: '1rem' }}>{entries.length} records</span></div></div><p className="subtle">Tracks member sign-ins, sign-outs, and related session activity.</p>{message && <p className="message">{message}</p>}<div className="table-wrap"><table><thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead><tbody>{visibleEntries.map((entry) => <tr key={entry.id}><td><strong>{entry.full_name || entry.email || 'Unknown user'}</strong><small>{entry.email}</small></td><td>{entry.action}</td><td>{entry.details}</td><td>{entry.created_at ? new Date(entry.created_at).toLocaleString('en-IN') : '—'}</td></tr>)}</tbody></table></div><div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}><button className="text-button" disabled={page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button><span className="subtle">Page {page} of {totalPages}</span><button className="text-button" disabled={page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))}>Next</button></div></section>
 }
 
 function Calendar({ bookings, month, setMonth }) {
