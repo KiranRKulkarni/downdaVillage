@@ -41,8 +41,8 @@ export default function OverviewPage({ totals, bookings, month, setMonth, checkI
     </section>
 
     {/* Two-column layout: Property overview on the left, Today's room activity on the right */}
-    <div className="property-and-activity" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-      <section className="property-section" style={{ flex: 1 }}>
+    <div className="property-and-activity" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'nowrap' }}>
+      <section className="property-section" style={{ flex: '1 1 0', minWidth: 0 }}>
         <div className="section-heading">
           <div>
             <p className="eyebrow">PROPERTY VIEW</p>
@@ -64,7 +64,7 @@ export default function OverviewPage({ totals, bookings, month, setMonth, checkI
         </div>
       </section>
 
-      <aside style={{ width: 360 }}>
+      <aside style={{ flex: '0 0 360px' }}>
         <TodayBookings bookings={bookings} checkIn={checkIn} checkingIn={checkingIn} checkOut={checkOut} checkingOut={checkingOut} />
       </aside>
     </div>
