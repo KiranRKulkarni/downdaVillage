@@ -1,5 +1,6 @@
 import Calendar from '../components/Calendar'
 import TodayBookings from '../components/TodayBookings'
+import { exportDailyMovement } from '../utils/exportDailyMovement'
 import { PROPERTIES } from '../data'
 
 const money = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(value || 0))
@@ -40,15 +41,34 @@ export default function OverviewPage({ totals, bookings, month, setMonth, checkI
       <Metric label="Payment follow-ups" value={totals.pending} onClick={onPaymentFollowUps} />
     </section>
 
-    {/* Two-column layout: Property overview on the left, Today's room activity on the right */}
-    <div className="property-and-activity" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'nowrap' }}>
-      <section className="property-section" style={{ flex: '1 1 0', minWidth: 0 }}>
+    {/* Two-column header row with grid */}
+    <div className="overview-split">
+      <div>
         <div className="section-heading">
           <div>
             <p className="eyebrow">PROPERTY VIEW</p>
             <h2>Property-wise overview</h2>
           </div>
         </div>
+      </div>
+
+      <div>
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">TODAY · {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }).toUpperCase()}</p>
+            <h2>Today’s room activity</h2>
+          </div>
+          <div className="today-actions">
+            <button className="export-button" onClick={() => exportDailyMovement(bookings)}>Daily Report</button>
+            <span className="today-count">{bookings.filter(b => !b.checked_out && b.stay_status !== 'cancelled').length} records</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Two-column content area using the same grid */}
+    <div className="overview-split">
+      <section className="property-section">
         <div className="property-cards">
           {propertyBreakdown.map((item) => (
             <PropertyCard
@@ -64,8 +84,8 @@ export default function OverviewPage({ totals, bookings, month, setMonth, checkI
         </div>
       </section>
 
-      <aside style={{ flex: '0 0 360px' }}>
-        <TodayBookings bookings={bookings} checkIn={checkIn} checkingIn={checkingIn} checkOut={checkOut} checkingOut={checkingOut} />
+      <aside>
+        <TodayBookings bookings={bookings} checkIn={checkIn} checkingIn={checkingIn} checkOut={checkOut} checkingOut={checkingOut} showHeader={false} />
       </aside>
     </div>
 

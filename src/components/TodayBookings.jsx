@@ -1,6 +1,6 @@
 const today = new Date().toISOString().slice(0, 10)
 
-export default function TodayBookings({ bookings, checkIn, checkingIn, checkOut, checkingOut }) {
+export default function TodayBookings({ bookings, checkIn, checkingIn, checkOut, checkingOut, showHeader = true }) {
   const isCheckedOut = (booking) => booking.checked_out === true || booking.stay_status === 'checked_out'
   const arrivals = bookings.filter((booking) => booking.check_in === today && !isCheckedOut(booking) && booking.stay_status !== 'checked_in' && booking.stay_status !== 'cancelled')
   const departures = bookings.filter((booking) => booking.check_out === today && !isCheckedOut(booking) && booking.stay_status !== 'checked_out' && booking.stay_status !== 'cancelled')
@@ -9,16 +9,18 @@ export default function TodayBookings({ bookings, checkIn, checkingIn, checkOut,
   const activityCount = arrivals.length + departures.length + staying.length + cancelled.length
   return (
     <section className="today-bookings">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">TODAY · {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }).toUpperCase()}</p>
-          <h2>Today’s room activity</h2>
+      {showHeader && (
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">TODAY · {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }).toUpperCase()}</p>
+            <h2>Today’s room activity</h2>
+          </div>
+          <div className="today-actions">
+            <button className="export-button" onClick={() => exportDailyMovement(bookings)}>Daily Report</button>
+            <span className="today-count">{activityCount} records</span>
+          </div>
         </div>
-        <div className="today-actions">
-          <button className="export-button" onClick={() => exportDailyMovement(bookings)}>Daily Report</button>
-          <span className="today-count">{activityCount} records</span>
-        </div>
-      </div>
+      )}
 
       <div className="today-columns">
         <Activity title="Arrivals" items={arrivals} label="Check-in today" />
