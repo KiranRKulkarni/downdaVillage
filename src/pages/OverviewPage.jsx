@@ -32,5 +32,43 @@ export default function OverviewPage({ totals, bookings, month, setMonth, checkI
     }
   })
 
-  return <><section className="metrics"><Metric label="Total bookings" value={totals.bookings} note={totals.cancelled ? `${totals.cancelled} cancelled` : undefined} onClick={totals.cancelled ? onShowCanceled : undefined} /><Metric label="Gross revenue" value={money(totals.revenue)} /><Metric label="Cash collected" value={money(totals.cash)} onClick={onCashCollection}/><Metric label="Payment follow-ups" value={totals.pending} onClick={onPaymentFollowUps}/></section><section className="property-section"><div className="section-heading"><div><p className="eyebrow">PROPERTY VIEW</p><h2>Property-wise overview</h2></div></div><div className="property-cards">{propertyBreakdown.map((item) => <PropertyCard key={item.property} property={item.property} bookingsCount={item.bookingsCount} revenue={item.revenue} collections={item.collections} pending={item.pending} onClick={() => onOpenProperty?.(item.property)} />)}</div></section><TodayBookings bookings={bookings} checkIn={checkIn} checkingIn={checkingIn} checkOut={checkOut} checkingOut={checkingOut}/><Calendar bookings={bookings} month={month} setMonth={setMonth}/></>
+  return <>
+    <section className="metrics">
+      <Metric label="Total bookings" value={totals.bookings} note={totals.cancelled ? `${totals.cancelled} cancelled` : undefined} onClick={totals.cancelled ? onShowCanceled : undefined} />
+      <Metric label="Gross revenue" value={money(totals.revenue)} />
+      <Metric label="Cash collected" value={money(totals.cash)} onClick={onCashCollection} />
+      <Metric label="Payment follow-ups" value={totals.pending} onClick={onPaymentFollowUps} />
+    </section>
+
+    {/* Two-column layout: Property overview on the left, Today's room activity on the right */}
+    <div className="property-and-activity" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+      <section className="property-section" style={{ flex: 1 }}>
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">PROPERTY VIEW</p>
+            <h2>Property-wise overview</h2>
+          </div>
+        </div>
+        <div className="property-cards">
+          {propertyBreakdown.map((item) => (
+            <PropertyCard
+              key={item.property}
+              property={item.property}
+              bookingsCount={item.bookingsCount}
+              revenue={item.revenue}
+              collections={item.collections}
+              pending={item.pending}
+              onClick={() => onOpenProperty?.(item.property)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <aside style={{ width: 360 }}>
+        <TodayBookings bookings={bookings} checkIn={checkIn} checkingIn={checkingIn} checkOut={checkOut} checkingOut={checkingOut} />
+      </aside>
+    </div>
+
+    <Calendar bookings={bookings} month={month} setMonth={setMonth} />
+  </>
 }
